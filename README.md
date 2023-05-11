@@ -1,3 +1,32 @@
+# Patch
+
+As described by the repository name, I fixed the problem that coc-sumneko-lua extension was not available on nixos (only for non-nix-managed neovim/vim configurations).
+
+## How did I fix this problem?
+
+I added a new configuration field named `sumneko-lua.bin` to specify the path of lua-language-server command. Because if you use nix to manage `sumneko-lua-server` package, you will find that `/nix/store/xxxx-sumneko-lua-server/share/sumneko-lua-server/bin/lua-language-server` is a read-only file and cannot be executed(I think it maybe case by nix sandbox mechanism). And real executable binary should be in `/nix/store/xxxx-sumneko-lua-server/bin/lua-language-server`. But coc-sumneko-lua can only specify serverDir, and bin is indirectly obtained through serverDir, but NixOS cannot meet this condition. So, I added the `sumneko-lua.bin` field so that user can explicitly specify the location of bin.
+
+## How to use?
+First, because I did not publish this package on npm, we need to install it through plugins. If I use `vim-plug` to manager your plugins. I should add `Plug 'PHSix/coc-sumneko-lua-for-nixos', {'do': 'yarn install --frozen-lockfile'}` in my vimrc.
+
+And then, if you use `home-manager` or `nix-env` to install sumneko-lua-server, you can configure it as follows:
+```json
+{
+ "sumneko-lua.bin": "~/.nix-profile/bin/lua-language-server",
+ "sumneko-lua.serverDir": "~/.nix-profile/share/lua-language-server"
+}
+```
+If you are not using home-manager to manage your user configuration, you can configure it as follows:
+
+```json
+{
+ "sumneko-lua.bin": "/run/current-system/sw/bin/lua-language-server",
+ "sumneko-lua.serverDir": "/run/current-system/sw/share/lua-language-server"
+}
+```
+
+I hope this helps! Let me know if you have any other questions.
+
 # coc-sumneko-lua
 
 Lua extension using sumneko lua-language-server for coc.nvim
