@@ -98,6 +98,11 @@
           "default": true,
           "description": "Automatically check for updates after startup(Only one check within 4 hours)"
         },
+        "sumneko-lua.bin": {
+          "type": "string",
+          "default": null,
+          "description": "The lua-language-server command path."
+        },
         "sumneko-lua.serverDir": {
           "type": "string",
           "default": null,

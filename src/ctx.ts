@@ -28,6 +28,8 @@ export function isLuaDocument(document: TextDocument): document is LuaDocument {
 
 export type Cmd = (...args: any[]) => unknown;
 
+const absolutePath = (path: string) => path.startsWith('~/') ? path.replace(/~\//, `${process.env.HOME!}/`) : path;
+
 export class Ctx {
   client!: LanguageClient;
   public readonly config = new Config();
@@ -52,11 +54,16 @@ export class Ctx {
   resolveBin(): [string, string[]] | undefined {
     // TODO: handle Lua.misc.executablePath
     const serverDir = this.config.serverDir
-      ? this.config.serverDir
+      ? absolutePath(this.config.serverDir)
       : path.join(this.extCtx.storagePath, 'sumneko-lua-ls', 'extension', 'server');
+    // const serverDir = path.resolve('~/.nix-profile/share/lua-language-server');
 
     const platform = process.platform;
-    const bin = path.join(serverDir, 'bin', platform === 'win32' ? 'lua-language-server.exe' : 'lua-language-server');
+    const _bin = this.config.bin ? absolutePath(this.config.bin) : undefined;
+    // const _bin = '/home/ph/.nix-profile/bin/lua-language-server';
+    const bin = _bin ?? path.join(serverDir, 'bin', platform === 'win32' ? 'lua-language-server.exe' : 'lua-language-server');
+
+    console.log(_bin, serverDir);
     if (!fs.existsSync(bin)) {
       return;
     }

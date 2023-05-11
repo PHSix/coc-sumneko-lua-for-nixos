@@ -36,4 +36,8 @@ export class Config {
   get serverDir() {
     return this.cfg.get<string>('serverDir');
   }
+
+  get bin() {
+    return this.cfg.get<string>('bin');
+  }
 }

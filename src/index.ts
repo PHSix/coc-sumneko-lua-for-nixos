@@ -1,12 +1,17 @@
 import { ExtensionContext, window } from 'coc.nvim';
-import { writeFile, existsSync, mkdirSync, readFile } from 'fs-extra';
+import { writeFile, existsSync, mkdirSync, readFile, readFileSync } from 'fs-extra';
 import path from 'path';
 import * as cmds from './commands';
 import { Ctx } from './ctx';
 import { downloadServer } from './downloader';
 
+const isNixos = () => {
+  return process.platform === 'linux' && readFileSync('/etc/os-release').toString().split('\n').some(line => line === 'ID=nixos');
+};
+
 export async function activate(context: ExtensionContext): Promise<void> {
   const ctx = new Ctx(context);
+  const _isNixos = isNixos();
   if (!ctx.config.enabled) {
     return;
   }
@@ -19,7 +24,7 @@ export async function activate(context: ExtensionContext): Promise<void> {
   ctx.registerCommand('install', cmds.install);
 
   const bin = ctx.resolveBin();
-  if (!bin) {
+  if (!bin && !_isNixos) {
     let ret = 'Yes';
     if (ctx.config.prompt) {
       ret =
@@ -43,6 +48,11 @@ export async function activate(context: ExtensionContext): Promise<void> {
       );
       return;
     }
+  }
+  if (_isNixos && (!ctx.config.bin || !ctx.config.serverDir)) {
+    window.showWarningMessage('You current use NixOS, you must set sumneko-lua.bin and sumneko-lua.serverDir manually.');
+  } else if (!bin) {
+    window.showWarningMessage('You current use NixOS, you sumneko-lua.bin or sumneko-lua.serverDir is wrong, make sure you write a correct path.');
   }
 
   ctx.registerCommand('version', cmds.version);
