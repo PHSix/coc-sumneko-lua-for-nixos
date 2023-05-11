@@ -51,8 +51,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
   }
   if (_isNixos && (!ctx.config.bin || !ctx.config.serverDir)) {
     window.showWarningMessage('You current use NixOS, you must set sumneko-lua.bin and sumneko-lua.serverDir manually.');
+    return;
   } else if (!bin) {
     window.showWarningMessage('You current use NixOS, you sumneko-lua.bin or sumneko-lua.serverDir is wrong, make sure you write a correct path.');
+    return;
   }
 
   ctx.registerCommand('version', cmds.version);
